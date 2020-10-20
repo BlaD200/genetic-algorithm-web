@@ -12,7 +12,7 @@
                     server="http://localhost:9000/load/json/all"
                     v-bind:files="myFiles"
                     v-on:init="handleFilePond"
-                    v-on:addfile="handleFilePond"
+                    v-on:processfile="handleFilePondLoad"
             />
 
             <hr>
@@ -64,9 +64,10 @@
 
             <b-row v-if="!loading">
                 <b-col></b-col>
-                <b-col cols="12" md="6" class="text-center my-2">
+                <b-col cols="12" md="8" class="text-center my-2">
                     <b-button
                             variant="outline-success"
+                            size="lg"
                             :disabled="myFiles.length === 0"
                             @click="generateTimetable"
                             v-b-tooltip.hover.top
@@ -123,6 +124,17 @@
             }
         },
         methods: {
+            handleFilePondLoad(data) {
+                if (data) {
+                    console.log(data.error);
+                    console.log(data.code);
+                    if (data.code === 200){
+                        this.myFiles = this.$refs.pond.getFiles();
+                    }
+                } else {
+                    this.myFiles = this.$refs.pond.getFiles();
+                }
+            },
             handleFilePond: function () {
                 console.log('FilePond has initialized');
 
