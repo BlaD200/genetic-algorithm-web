@@ -11,8 +11,8 @@
                     accepted-file-types="application/json"
                     server="http://localhost:9000/load/json/all"
                     v-bind:files="myFiles"
-                    v-on:init="handleFilePondInit"
-                    v-on:addfile="handleFilePondInit"
+                    v-on:init="handleFilePond"
+                    v-on:addfile="handleFilePond"
             />
 
             <hr>
@@ -123,7 +123,7 @@
             }
         },
         methods: {
-            handleFilePondInit: function () {
+            handleFilePond: function () {
                 console.log('FilePond has initialized');
 
                 // FilePond instance methods are available on `this.$refs.pond`
@@ -139,23 +139,68 @@
                     },
                     responseType: 'blob'
                 }).then(response => {
-                    console.log(response.status)
-                    if (response.status === 200)
-                        FileSaver.saveAs(response.data, "TimeTable.xlsx");
-                    else
-                        console.log("Cannot generate")
+                    if (response.headers['correct'] === "true")
+                        this.downloadTimetable(response.data)
+                    else {
+                        const h = this.$createElement
+                        const messageVNode = h('div', [
+                            h('p', [
+                                'This could happen because of some incorrect data provided, ' +
+                                'or because of setting. ' +
+                                'Try to review your data and/or change population/iterations/mutations to bigger size. '
+                            ]),
+                            h('p', [
+                                'Despite of message bellow, you still could download generated timetable ' +
+                                'and fix some problems by hand. '
+                            ]),
+                            h('p',[
+                                h('b', [
+                                    'Do you want to download it?'
+                                ])
+                            ])
+                        ])
+                        this.$bvModal.msgBoxConfirm([messageVNode], {
+                                title: "Cannot generate correct timetable",
+                                size: 'md',
+                                buttonSize: 'sm',
+                                okVariant: 'outline-success',
+                                cancelVariant: 'outline-secondary',
+                                headerClass: 'border-bottom-0',
+                                footerClass: 'p-2 border-top-0',
+                                centered: true,
+                                autoFocusButton: 'ok'
+                            }).then(choice => {
+                                if (choice)
+                                    this.downloadTimetable(response.data)
+                        })
+                    }
+                    this.loading = false;
+                }).catch(error => {
+                    if (error.response){
+                        this.$bvModal.msgBoxOk(
+                            "Response code: " + error.response.status +
+                            " Message: " + error.response.data, {
+                                title: "Error when processing request",
+                                size: 'md',
+                                buttonSize: 'sm',
+                                okVariant: 'outline-info',
+                                cancelVariant: 'outline-secondary',
+                                headerClass: 'border-bottom-0',
+                                footerClass: 'p-2 border-top-0',
+                                centered: true,
+                                autoFocusButton: 'ok'
+                            })
+                    }
                     this.loading = false;
                 })
+            },
+            downloadTimetable(data){
+                FileSaver.saveAs(data, "TimeTable.xlsx");
             }
         }
     }
 </script>
 
 <style scoped>
-    /*div {*/
-    /*    width: 400px;*/
-    /*}*/
-    p {
-        text-align: center;
-    }
+
 </style>
