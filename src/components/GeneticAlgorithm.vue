@@ -11,7 +11,6 @@
                     accepted-file-types="application/json"
                     server="http://localhost:9000/load/json/all"
                     v-bind:files="myFiles"
-                    v-on:init="handleFilePond"
                     v-on:processfile="handleFilePondLoad"
             />
 
@@ -135,14 +134,9 @@
                     this.myFiles = this.$refs.pond.getFiles();
                 }
             },
-            handleFilePond: function () {
-                console.log('FilePond has initialized');
-
-                // FilePond instance methods are available on `this.$refs.pond`
-                this.myFiles = this.$refs.pond.getFiles()
-            },
             generateTimetable() {
                 this.loading = true;
+                this.$refs.pond.removeFiles();
                 instance.get("/start", {
                     params: {
                         unitsNumber: this.units,
