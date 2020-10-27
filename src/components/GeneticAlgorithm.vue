@@ -102,8 +102,7 @@
 
     const axios = require('axios');
     const instance = axios.create({
-        baseURL: 'http://localhost:9000/algorithm/',
-        timeout: 1000
+        baseURL: 'http://localhost:9000/algorithm/'
     });
 
     const FileSaver = require('file-saver');
@@ -137,6 +136,7 @@
             generateTimetable() {
                 this.loading = true;
                 this.$refs.pond.removeFiles();
+				this.myFiles = this.$refs.pond.getFiles();
                 instance.get("/start", {
                     params: {
                         unitsNumber: this.units,
